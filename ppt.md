@@ -1,4 +1,4 @@
-title: Neo4J與Ice了解
+title: Neo4J與Ice
 speaker: 曾德雄
 url: https://github.com/ksky521/nodeppt
 transition: cards
