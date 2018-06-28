@@ -15,42 +15,289 @@
     <link rel="stylesheet" href="./js/highlight/styles/monokai_sublime.css">
     <link rel="stylesheet" href="./css/font-awesome.css">
     
-<link rel="stylesheet" href="./css/theme.moon.css">
+<link rel="stylesheet" href="./css/theme.light.css">
 </head>
 <body>
 <div class="slides">
     <slides id="container">
         <slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
-<h1>Neo4J與Ice了解</h1>
+<h1>Neo4J與ZeroC.Ice</h1>
 <h2>曾德雄</h2>
 
 </article></section></slide>
-<slide class="slide"><section class="slide-wrapper"><article class="flexbox vleft">
-<h1>封面样式2</h1>
-<h2>左对齐</h2>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J</h1>
+<h2>圖形資料庫</h2>
+<ul>
+<li>資料模型：<a href="https://github.com/opencypher/openCypher/blob/master/docs/property-graph-model.adoc#pgm-definitions-node" target="_blank">Property Graph Model</a></li>
+<li>Cypher 查詢語言</li>
+<li>交易</li>
+<li>其他功能</li>
+</ul>
 
 </article></section></slide>
-<slide class="slide fill" style="background-image:url('./img/bg1.png')"><section class="slide-wrapper"><article>
-<h2>使用背景</h2>
-
-</article></section></slide>
-<slide class="slide"><section class="slide-wrapper"><hgroup>
-<h2>使用.class/#id/自定义属性样式</h2>
-
-</hgroup><article>
-
-<pre><code class="javascript">alert(&#39;nodeppt&#39;);
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J-資料模型</h1>
+<h2>實例(<strong>Entity</strong>)</h2>
+<ul>
+<li>節點：Node ()</li>
+<li>關係：Relationship</li>
+</ul>
+<h2>標記(<strong>Token</strong>)</h2>
+<ul>
+<li>標籤：Label</li>
+<li>屬性：Property</li>
+</ul>
+<p>所有實例都可以有很多標籤與屬性</p>
+<pre><code class="cql">CREATE (node: Node)
+SET
+    node.uuid = $uuid,
+    node.data = $data,
+    node.root = $root,
+    node.parent = $parent,
+    node.isBinaryleft = $isBinaryleft
+MATCH
+    (p {uuid: $parent}),
+    (n {uuid: $uuid})
+CREATE (p)&lt;-[:IsChild]-(n)
 </code></pre>
 
 </article></section></slide>
-<slide class="slide"><section class="slide-wrapper"><hgroup>
-<h2>主页面样式</h2>
-<h3>----是上下分界线</h3>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J-Cypher 查詢語言（不分大小寫）</h1>
+<ul>
+<li>Parameters 設定參數避免注入攻擊</li>
+<li>Clauses<ul>
+<li>CREATE 建立</li>
+<li>MATCH [WHERE] 查詢</li>
+<li>SET 設定</li>
+<li>RETURN 回傳</li>
+<li>FOREACH  處理集合</li>
+<li>WITH 定義</li>
+<li>[DETACH] DELETE 刪除</li>
+</ul>
+</li>
+<li>函數：<ul>
+<li>collect 建立集合</li>
+<li>endNode, startNode</li>
+<li>head, last</li>
+</ul>
+</li>
+</ul>
 
-</hgroup><article>
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J-Cypher 範例</h1>
+<pre><code class="cql">MATCH p = (:Tree {uuid: $root})&lt;-[r*0..]-(x:Node)
+WITH
+    collect(DISTINCT x) as nodes,
+    [
+        r in collect(DISTINCT last(r)) |
+        {
+            parentUUID: endNode(r).uuid,
+            childUUID: startNode(r).uuid
+        }
+    ] as rels
+RETURN size(nodes) AS nodesCount,size(rels) AS relsCount, nodes, rels
+</code></pre>
 
-<p>nodeppt是基于nodejs写的支持 <strong>Markdown!</strong> 语法的网页PPT，当前版本：1.4.5</p>
-<p>Github：<a href="https://github.com/ksky521/nodeppt" target="_blank">https://github.com/ksky521/nodeppt</a></p>
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J-交易</h1>
+<ul>
+<li>寫入交易與讀取交易</li>
+<li>叢集模式下將查詢其中一個伺服器</li>
+</ul>
+<pre><code class="csharp">using (var session = driver.Session())
+{
+    var uuid = Guid.NewGuid().ToString();
+    logger.LogInformation($&quot;{uuid}|{data}|{root}|{parent}|Start&quot;);
+    var id = session.WriteTransaction((tx) =&gt;
+    {
+        var parms = new { uuid, data, root, parent, isBinaryleft };
+        var query = @&quot;...&quot;;
+        var result = tx.Run(query, parms);
+        tx.Run(@&quot;...&quot;, parms);
+        return (result.Single())[0].As&lt;string&gt;();
+    });
+    logger.LogInformation($&quot;{uuid}|{data}|{root}|{parent}|{id}&quot;);
+    return true;
+}
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>Neo4J-其他功能</h1>
+<ul>
+<li><a href="https://neo4j.com/docs/operations-manual/3.4/introduction/#editions" target="_blank">企業版</a>（要收費）<ul>
+<li>Auto-reuse of space 資料庫佔用空間</li>
+<li>安全認證</li>
+<li>叢集與負載平衡</li>
+<li>在線備份</li>
+</ul>
+</li>
+</ul>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice</h1>
+<h2>中間件平台 跨平台與程式語言</h2>
+<ul>
+<li>Slice 規範語言</li>
+<li><strong>Glacier2</strong> 穿越防火牆與callback</li>
+<li>其他沒實做的功能</li>
+</ul>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice Slice 規範語言</h1>
+<ul>
+<li>共用 Slice 文件 -&gt; 目標語言原始碼 + 目標語言函式庫 -&gt; 執行環境</li>
+</ul>
+<pre><code class="csharp">module TreeDiagram
+{
+    interface ServerEvent {
+        void TreeListUpdate();
+        void TreeUpdate(string uuid);
+        void NodeUpdate(string uuid, string data);
+    };
+
+    interface Server
+    {
+        idempotent void moveNode(string uuid, string newParent);
+        idempotent void deleteNode(string uuid);
+        TreeView getNodeView(string uuid);
+        void initEvent(ServerEvent* event);
+    }
+}
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice Slice 橋接Class</h1>
+<pre><code class="csharp">namespace Server.lib.IceBridge
+{
+    public class Server : TreeDiagram.ServerDisp_
+    {
+        private readonly ILogger&lt;Server&gt; logger;
+        private readonly IList&lt;ServerEventPrxHelper&gt; clients = new List&lt;ServerEventPrxHelper&gt;();
+
+        private readonly Service.ServerService service;
+        public Server(ILogger&lt;Server&gt; logger)
+        {
+            this.logger = logger;
+            service = lib.Provider.serviceProvider.GetRequiredService&lt;Service.ServerService&gt;();
+            var eventService = lib.Provider.serviceProvider.GetRequiredService&lt;Service.EventService&gt;();
+            eventService.evtTreeListUpdate += new Service.TreeListUpdateDelegate(TreeListUpdateHandler);
+            eventService.evtTreeUpdate += new Service.TreeUpdateDelegate(TreeUpdateHandler);
+            eventService.evtNodeUpdate += new Service.NodeUpdateDelegate(NodeUpdateHandler);
+        }
+    }
+    public override void createTree(Tree tree, Current current)
+    {
+        logger.LogInformation($&quot;{tree.uuid}&quot;);
+        service.createTree(new Model.TreeModel()
+        {
+            uuid = tree.uuid,
+            type = tree.type == TreeType.Binary ? Model.TreeType.Binary : Model.TreeType.Normal
+        }).Wait();
+    }
+}
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice Slice 服務</h1>
+<pre><code class="csharp">public class IceService : IceBox.Service, IDisposable
+    {
+        private Ice.ObjectAdapter adapter;
+        public async static Task StartIceService(string[] args)
+        {
+            Console.WriteLine(&quot;StartIceServer&quot;);
+            await Task.Delay(0);
+            var config = Config.IceAdapterConfig.Config;
+            Console.WriteLine($&quot;IceServer.name = \&quot;{config.name}\&quot;&quot;);
+            using (Ice.Communicator communicator = Ice.Util.initialize(ref args))
+            using (IceService iceService = new IceService())
+            {
+                iceService.start(config.name, communicator, args);
+                await Task.Factory.StartNew(() =&gt;
+                {
+                    communicator.waitForShutdown();
+                });
+            }
+        }
+
+        private void AddService(ref Ice.ObjectAdapter adapter)
+        {
+            var provider = lib.Provider.serviceProvider;
+            adapter.add(provider.GetRequiredService&lt;lib.IceBridge.Server&gt;(), Ice.Util.stringToIdentity(&quot;Server&quot;));
+        }
+
+        public void start(string name, Communicator communicator, string[] args)
+        {
+            var config = Config.IceAdapterConfig.Config;
+            Console.WriteLine($&quot;IceServer.endpoints = \&quot;{config.endpoints}\&quot;&quot;);
+            adapter = communicator.createObjectAdapterWithEndpoints(name, config.endpoints);
+            AddService(ref adapter);
+            adapter.activate();
+        }
+    }
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice Glacier2</h1>
+<h2>Client &lt;-&gt; [外網 glacier2 內網] &lt;-&gt; Server</h2>
+<p>執行</p>
+<pre><code class="sh">glacier2router --Ice.Config=src/glacier2.conf
+</code></pre>
+<p>glacier2.conf 檔案</p>
+<pre><code class="conf">Glacier2.InstanceName=PublicRouter
+Glacier2.Client.Endpoints=tcp -p 10001
+# Server 可以透過 Glacier2 主動呼叫用戶端
+Glacier2.Server.Endpoints=tcp -h 127.0.0.1
+#忽略認證
+Glacier2.PermissionsVerifier=PublicRouter/NullPermissionsVerifier
+Glacier2.Client.ForwardContext=1
+Glacier2.Server.ForwardContext=1
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>ZeroC.Ice Glacier2 Client</h1>
+<pre><code class="typescript">class ClientEvent extends TreeDiagram.ServerEvent {}
+
+// 初始化通訊物件時加入Router宣告
+const communicator = Ice.initialize([
+    &quot;--Ice.Default.Router=PublicRouter/router:tcp -h 127.0.0.1 -p 10001&quot;,
+    &quot;--Ice.ACM.Client.Heartbeat=3&quot;,
+]);
+
+const router = await Glacier2.RouterPrx.checkedCast(
+    this.communicator.getDefaultRouter()
+);
+
+// 建立Router通訊
+await router.createSession(&quot;username&quot;, &quot;password&quot;);
+
+const category = await router.getCategoryForClient();
+const proxy = communicator.stringToProxy(&quot;Server:tcp -h 127.0.0.1 -p 10000&quot;);
+const serverEvent = TreeDiagram.ServerEventPrx.uncheckedCast(
+    adapter.add(
+        new ClientEvent(), 
+        new Ice.Identity(&quot;serverEvent&quot;, category)
+    )
+);
+const server = await TreeDiagram.ServerPrx.checkedCast(proxy);
+
+await server.initEvent(serverEvent);
+</code></pre>
+
+</article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>報告完畢</h1>
+<h2>敬請不吝斧正</h2>
 
 </article></section></slide>
         
