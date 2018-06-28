@@ -11,6 +11,10 @@ theme: light
 
 ## 曾德雄
 
+---
+
+使用**方向踺**（ ↑ ↓ ← →）或**空白鍵**進行簡報翻頁
+
 [slide]
 
 # Neo4J
@@ -293,6 +297,14 @@ const server = await TreeDiagram.ServerPrx.checkedCast(proxy);
 await server.initEvent(serverEvent);
 
 ```
+
+[slide]
+
+# ZeroC.Ice 其他沒實做的功能
+
+- IceStorm
+- IceGrid
+- IcePatch
 
 [slide]
 
