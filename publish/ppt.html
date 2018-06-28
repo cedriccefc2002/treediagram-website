@@ -308,6 +308,55 @@ await server.initEvent(serverEvent);
 </ul>
 
 </article></section></slide>
+<slide class="slide"><section class="slide-wrapper"><hgroup>
+<h1>ZeroC.Ice 與 gRPC 比較</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ICE</th>
+<th>gRPC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代理與用戶端推播</td>
+<td>Glacier</td>
+<td></td>
+</tr>
+<tr>
+<td>叢集</td>
+<td>IceGrid</td>
+<td></td>
+</tr>
+<tr>
+<td>服務</td>
+<td>IceBox</td>
+<td></td>
+</tr>
+<tr>
+<td>通訊</td>
+<td>tcp｜udp</td>
+<td>HTTP/2</td>
+</tr>
+<tr>
+<td>支援語言</td>
+<td>C++, C#, Java, JavaScript, Objective-C, Python, PHP, Ruby.</td>
+<td>多 Go 與 Dart</td>
+</tr>
+<tr>
+<td>規範語言</td>
+<td>Slice</td>
+<td>ProtoBuf</td>
+</tr>
+</tbody>
+</table>
+
+</hgroup><article>
+
+<p><a href="https://github.com/grpc/grpc/blob/master/doc/load-balancing.md" target="_blank">gRPC實做Load Balancing官方建議</a></p>
+
+</article></section></slide>
 <slide class="slide"><section class="slide-wrapper"><article class="flexbox vcenter">
 <h1>報告完畢</h1>
 <h2>敬請不吝斧正</h2>

@@ -308,6 +308,22 @@ await server.initEvent(serverEvent);
 
 [slide]
 
+# ZeroC.Ice 與 gRPC 比較
+
+|   | ICE  | gRPC |
+|---|---   |  --- |
+| 代理與用戶端推播  | Glacier|  |
+| 叢集  | IceGrid|  |
+| 服務  | IceBox|  |
+| 通訊  |   tcp｜udp   |  HTTP/2    |
+| 支援語言  | C++, C#, Java, JavaScript, Objective-C, Python, PHP, Ruby. | 多 Go 與 Dart|
+| 規範語言  | Slice| ProtoBuf |
+
+---
+[gRPC實做Load Balancing官方建議](https://github.com/grpc/grpc/blob/master/doc/load-balancing.md)
+
+[slide]
+
 # 報告完畢
 
 ## 敬請不吝斧正
